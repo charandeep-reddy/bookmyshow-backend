@@ -2,14 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Booking from "@/models/Booking";
 import Show from "@/models/Show";
-import User from "@/models/User";
+import { getUserIdFromRequest } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
     try {
         await dbConnect();
-        const { userId, showId, seats } = await req.json();
 
-        if (!userId || !showId || !seats || !Array.isArray(seats) || seats.length === 0) {
+        const userId = getUserIdFromRequest(req);
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+
+        const { showId, seats } = await req.json();
+        if (!showId || !seats || !Array.isArray(seats) || seats.length === 0) {
             return NextResponse.json({ error: "Invalid request" }, { status: 400 });
         }
 
